@@ -112,10 +112,21 @@
         rect1X: [0, 0, { start: 0, end: 0 } ],
         rect2X: [0, 0, { start: 0, end: 0 } ],
         blendHeight: [0, 0, { start: 0, end: 0 } ],
+        canvas_scale: [0, 0, { start: 0, end: 0 } ],
+        canvasCaption_opacity: [0, 1, { start: 0, end: 0 } ],
+        canvasCaption_translateY: [20, 0, { start: 0, end: 0 } ],
         rectStartY: 0,
       }
     },
   ];
+
+  function checkMenu() {
+    if( yOffset > 44 ){
+      document.body.classList.add('local-nav-sticky');
+    }else{
+      document.body.classList.remove('local-nav-sticky');
+    }
+  }
 
   function setLayout() {
     // 각 스크롤 섹션의 높이 세팅
@@ -410,6 +421,33 @@
 
           objs.canvas.classList.add('sticky');
           objs.canvas.style.top = `${-(objs.canvas.height - (objs.canvas.height * canvasScaleRatio)) / 2}px`;
+
+          // 블렌드 이미지 축소
+          if( scrollRatio > values.blendHeight[2].end ){
+            // console.log('블렌드 끝나고');
+            values.canvas_scale[0] = canvasScaleRatio;
+            values.canvas_scale[1] = document.body.offsetWidth / (objs.canvas.width * 1.5);
+            values.canvas_scale[2].start = values.blendHeight[2].end;
+            values.canvas_scale[2].end = values.canvas_scale[2].start + 0.2;
+
+            objs.canvas.style.transform = `scale(${calcValues(values.canvas_scale, currentYOffset)})`;
+            objs.canvas.style.marginTop = 0;
+          }
+
+          // 다시 스크롤 시작
+          if( scrollRatio > values.canvas_scale[2].end && values.canvas_scale[2].end > 0 ){
+            objs.canvas.classList.remove('sticky');
+            objs.canvas.style.marginTop = `${ scrollHeight * 0.4 }px`
+
+            // 하단 텍스트 올라오기
+            values.canvasCaption_opacity[2].start = values.canvas_scale[2].end;
+            values.canvasCaption_opacity[2].end = values.canvasCaption_opacity[2].start + 0.1;
+            values.canvasCaption_translateY[2].start = values.canvas_scale[2].end;
+            values.canvasCaption_translateY[2].end = values.canvasCaption_opacity[2].start + 0.1;
+
+            objs.canvasCaption.style.opacity = calcValues(values.canvasCaption_opacity, currentYOffset);
+            objs.canvasCaption.style.transform = `translate3d(0, ${calcValues(values.canvasCaption_translateY, currentYOffset)}%, 0)`
+          }
         }
         
         break;
@@ -444,6 +482,7 @@
   window.addEventListener('scroll', () => {
     yOffset = window.pageYOffset;
     scrollLoop();
+    checkMenu();
   });
   window.addEventListener('load', () => {
     setLayout();
