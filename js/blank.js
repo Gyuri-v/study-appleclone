@@ -465,9 +465,18 @@
       prevScrollHeight += sceneInfo[i].scrollHeight;
     }
 
+    if (delayedYOffset < prevScrollHeight + sceneInfo[currentScene].scrollHeight) {
+      document.body.classList.remove('scroll-effect-end');
+    }
+
     if (delayedYOffset > prevScrollHeight + sceneInfo[currentScene].scrollHeight) {
       enterNewScene = true;
-      currentScene++;
+      if( currentScene === sceneInfo.length - 1 ){
+        document.body.classList.add('scroll-effect-end');
+      }
+      if( currentScene < sceneInfo.length - 1 ){
+        currentScene++;
+      }
       document.body.setAttribute('id', `show-scene-${currentScene}`);
     }
 
@@ -507,9 +516,24 @@
   }
 
   window.addEventListener('load', () => {
+
     document.body.classList.remove('before-load');
     setLayout();
     sceneInfo[0].objs.context.drawImage(sceneInfo[0].objs.videoImages[0], 0, 0);
+
+    let tempYOffset = yOffset;
+    let tempScrollCount = 0;
+    if( yOffset > 0 ){
+      let siId = setInterval(() => {
+        window.scrollTo(0, tempYOffset);
+        tempYOffset += 2;
+  
+        if( tempScrollCount > 10 ){
+          clearInterval(siId);
+        }
+        tempScrollCount++;
+      }, 20)
+    }
 
     window.addEventListener('scroll', () => {
       yOffset = window.pageYOffset;
@@ -523,17 +547,21 @@
     });
 
     window.addEventListener('resize', () => {
-      if(window.innerWidth > 600){
-        setLayout();
+      if(window.innerWidth > 900){
+        window.location.reload();
       }
-      sceneInfo[3].values.rectStartY = 0;
     });
 
-    window.addEventListener('orientationchange', setLayout);
+    window.addEventListener('orientationchange', () => {
+      scrollTo(0, 0);
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    });
 
     document.querySelector('.loading').addEventListener('transitionend', (e) => {
       document.body.removeChild(e.currentTarget);
-    })
+    });
   });
 
   setCanvasImages();
