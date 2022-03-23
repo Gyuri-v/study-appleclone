@@ -516,12 +516,21 @@
       rafState = true;
     }
   });
+  
   window.addEventListener('load', () => {
     setLayout();
     sceneInfo[0].objs.context.drawImage(sceneInfo[0].objs.videoImages[0], 0, 0);
   });
-  window.addEventListener('resize', setLayout);
 
-  setCanvasImages()
+  window.addEventListener('resize', () => {
+    if(window.innerWidth > 600){
+      setLayout();
+    }
+    sceneInfo[3].values.rectStartY = 0;
+  });
+
+  window.addEventListener('orientationchange', setLayout);
+
+  setCanvasImages();
 
 })();
